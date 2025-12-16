@@ -1,6 +1,7 @@
+"use client";
+
 import { registerUser } from "./actions";
 
-"use client";
 export default function RegisterPage() {
   async function handleSubmit(formData: FormData) {
     await registerUser(formData);
