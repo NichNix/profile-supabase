@@ -14,7 +14,6 @@ export async function loginUser(formData: FormData) {
 
   if (error) throw new Error(error.message);
   const cookieStore = await cookies();
-  // store access token and user id for server-side actions
   cookieStore.set("sb-access-token", data.session.access_token);
   cookieStore.set("sb-user-id", data.user?.id ?? "");
 

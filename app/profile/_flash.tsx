@@ -14,7 +14,6 @@ export default function ClientFlash() {
     if (updated === "1") {
       setMessage("Profil berhasil disimpan");
       setType("success");
-      // remove query param without reload
       params.delete("updated");
       const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
       window.history.replaceState({}, "", newUrl);

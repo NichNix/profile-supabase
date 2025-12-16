@@ -21,7 +21,6 @@ export default async function ProfilePage() {
     );
   }
 
-  // fetch profile server-side
   const { data: profiles } = await supabaseAdmin
     .from("profiles")
     .select("id, nama, alamat, no_ktp, foto_url")
@@ -33,13 +32,12 @@ export default async function ProfilePage() {
   async function handleLogout() {
     "use server";
     await logoutUser();
-    // Note: In production, you might want to use redirect() from next/navigation
   }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-zinc-900 dark:to-zinc-800 p-4">
       <div className="max-w-2xl mx-auto">
-        {/* client-side flash component reads URL params and shows success/error */}
+        {}
         <ClientFlash />
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Profil Saya</h1>

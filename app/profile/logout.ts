@@ -8,6 +8,5 @@ export async function logoutUser() {
   cookieStore.delete("sb-access-token");
   cookieStore.delete("sb-user-id");
 
-  // After clearing cookies, redirect user to login page
   redirect("/login");
 }

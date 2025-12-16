@@ -8,7 +8,7 @@ export async function saveProfile(formData: FormData) {
   const nama = formData.get("nama") as string;
   const alamat = formData.get("alamat") as string;
   const no_ktp = formData.get("no_ktp") as string;
-  const foto = formData.get("foto") as File;
+  const foto = formData.get("foto") as File | null;
 
   const cookieStore = await cookies();
   const cookieUserId = cookieStore.get("sb-user-id")?.value;
@@ -17,16 +17,22 @@ export async function saveProfile(formData: FormData) {
 
   if (!userId) throw new Error("User not authenticated");
 
+  const { data: existingProfiles } = await supabaseAdmin
+    .from("profiles")
+    .select("foto_url")
+    .eq("id", userId)
+    .limit(1);
+
+  const existingFotoUrl = existingProfiles?.[0]?.foto_url ?? null;
+
   let fotoPath: string | null = null;
 
-  if (foto && (foto as File).size > 0) {
-    // handle uploaded file: convert to Buffer for Node upload
+  if (foto && foto.size > 0 && foto.name) {
     try {
       const uploadedFile = foto as File & { name?: string };
       const arrayBuffer = await uploadedFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // determine extension from original filename or mime-type
       let ext = "jpg";
       if (uploadedFile.name && uploadedFile.name.includes(".")) {
         ext = uploadedFile.name.split('.').pop() || ext;
@@ -35,7 +41,7 @@ export async function saveProfile(formData: FormData) {
         if (m) ext = m;
       }
 
-      const filePath = `${userId}.${ext}`;
+      const filePath = `${userId}-${Date.now()}.${ext}`;
 
       const { data, error } = await supabaseAdmin.storage
         .from("photos")
@@ -43,14 +49,18 @@ export async function saveProfile(formData: FormData) {
 
       if (error) {
         console.error("Supabase storage upload error:", error);
-        throw new Error(error.message);
+        throw new Error(`Failed to upload foto: ${error.message}`);
       }
 
       fotoPath = data?.path ?? null;
+      console.log("Foto uploaded successfully:", filePath, "Path:", fotoPath);
     } catch (err: any) {
       console.error("Error uploading foto:", err);
-      throw new Error(err?.message ?? String(err));
+      throw new Error(`Gagal upload foto: ${err?.message ?? String(err)}`);
     }
+  } else {
+    fotoPath = existingFotoUrl;
+    console.log("No new foto selected, using existing:", fotoPath);
   }
 
   const { error: upsertError } = await supabaseAdmin.from("profiles").upsert({
@@ -62,11 +72,9 @@ export async function saveProfile(formData: FormData) {
   });
   if (upsertError) {
     console.error("Error upserting profile:", upsertError);
-    // redirect back with error
     const msg = encodeURIComponent(upsertError.message ?? "unknown error");
     redirect(`/profile?updated=0&error=${msg}`);
   }
 
-  // redirect back to profile with a query param to indicate success
   redirect("/profile?updated=1");
 }

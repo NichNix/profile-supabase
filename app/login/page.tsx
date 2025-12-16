@@ -10,7 +10,6 @@ export default function LoginPage() {
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for success message from URL
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "registered") {
       setSuccess("Registrasi berhasil! Silakan login dengan akun Anda.");
@@ -33,7 +32,6 @@ export default function LoginPage() {
       }
 
       await loginUser(formData);
-      // Redirect ke profile setelah login sukses
       window.location.href = "/profile";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Email atau password salah");

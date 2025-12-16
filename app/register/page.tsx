@@ -34,12 +34,10 @@ export default function RegisterPage() {
       const result = await registerUser(formData);
 
       if (!result || !result.success) {
-        // tampilkan pesan error dari server action jika ada
         setError(result?.error ?? "Terjadi kesalahan saat registrasi");
         return;
       }
 
-      // Redirect ke login setelah registrasi sukses
       window.location.href = "/login?success=registered";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan saat registrasi");
