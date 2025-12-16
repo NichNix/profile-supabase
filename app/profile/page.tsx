@@ -2,6 +2,7 @@ import { saveProfile } from "./actions";
 import { logoutUser } from "./logout";
 import { cookies } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase";
+import ClientFlash from "./_flash";
 
 export default async function ProfilePage() {
   const cookieStore = await cookies();
@@ -38,6 +39,8 @@ export default async function ProfilePage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-zinc-900 dark:to-zinc-800 p-4">
       <div className="max-w-2xl mx-auto">
+        {/* client-side flash component reads URL params and shows success/error */}
+        <ClientFlash />
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Profil Saya</h1>
           <form action={logoutUser}>

@@ -37,7 +37,12 @@ export async function saveProfile(formData: FormData) {
     no_ktp,
     foto_url: fotoPath,
   });
-  if (upsertError) throw new Error(upsertError.message);
+  if (upsertError) {
+    console.error("Error upserting profile:", upsertError);
+    // redirect back with error
+    const msg = encodeURIComponent(upsertError.message ?? "unknown error");
+    redirect(`/profile?updated=0&error=${msg}`);
+  }
 
   // redirect back to profile with a query param to indicate success
   redirect("/profile?updated=1");
