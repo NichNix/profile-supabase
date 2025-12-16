@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase";
+import { redirect } from "next/navigation";
 
 export async function saveProfile(formData: FormData) {
   const nama = formData.get("nama") as string;
@@ -36,6 +37,8 @@ export async function saveProfile(formData: FormData) {
     no_ktp,
     foto_url: fotoPath,
   });
-
   if (upsertError) throw new Error(upsertError.message);
+
+  // redirect back to profile with a query param to indicate success
+  redirect("/profile?updated=1");
 }

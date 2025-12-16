@@ -40,10 +40,7 @@ export default async function ProfilePage() {
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Profil Saya</h1>
-          <form action={async () => {
-            "use server";
-            await logoutUser();
-          }}>
+          <form action={logoutUser}>
             <button
               type="submit"
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
