@@ -1,6 +1,7 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { cookies } from "next/headers";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function saveProfile(formData: FormData) {
   const nama = formData.get("nama") as string;
@@ -8,24 +9,33 @@ export async function saveProfile(formData: FormData) {
   const no_ktp = formData.get("no_ktp") as string;
   const foto = formData.get("foto") as File;
 
-  // contoh userId hardcode dulu (biar build aman)
-  const userId = "dummy-user-id";
+  const cookieStore = await cookies();
+  const cookieUserId = cookieStore.get("sb-user-id")?.value;
+  const formUserId = (formData.get("userId") as string) || null;
+  const userId = formUserId ?? cookieUserId;
 
-  let fotoPath = null;
+  if (!userId) throw new Error("User not authenticated");
 
-  if (foto && foto.size > 0) {
-    const { data } = await supabase.storage
+  let fotoPath: string | null = null;
+
+  if (foto && (foto as File).size > 0) {
+    // note: on server actions, File is readable
+    const { data, error } = await supabaseAdmin.storage
       .from("photos")
       .upload(`${userId}.jpg`, foto, { upsert: true });
 
-    fotoPath = data?.path;
+    if (error) throw new Error(error.message);
+
+    fotoPath = data?.path ?? null;
   }
 
-  await supabase.from("profiles").upsert({
+  const { error: upsertError } = await supabaseAdmin.from("profiles").upsert({
     id: userId,
     nama,
     alamat,
     no_ktp,
     foto_url: fotoPath,
   });
+
+  if (upsertError) throw new Error(upsertError.message);
 }
