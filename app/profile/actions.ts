@@ -20,14 +20,37 @@ export async function saveProfile(formData: FormData) {
   let fotoPath: string | null = null;
 
   if (foto && (foto as File).size > 0) {
-    // note: on server actions, File is readable
-    const { data, error } = await supabaseAdmin.storage
-      .from("photos")
-      .upload(`${userId}.jpg`, foto, { upsert: true });
+    // handle uploaded file: convert to Buffer for Node upload
+    try {
+      const uploadedFile = foto as File & { name?: string };
+      const arrayBuffer = await uploadedFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-    if (error) throw new Error(error.message);
+      // determine extension from original filename or mime-type
+      let ext = "jpg";
+      if (uploadedFile.name && uploadedFile.name.includes(".")) {
+        ext = uploadedFile.name.split('.').pop() || ext;
+      } else if (uploadedFile.type) {
+        const m = uploadedFile.type.split('/').pop();
+        if (m) ext = m;
+      }
 
-    fotoPath = data?.path ?? null;
+      const filePath = `${userId}.${ext}`;
+
+      const { data, error } = await supabaseAdmin.storage
+        .from("photos")
+        .upload(filePath, buffer, { upsert: true, contentType: uploadedFile.type });
+
+      if (error) {
+        console.error("Supabase storage upload error:", error);
+        throw new Error(error.message);
+      }
+
+      fotoPath = data?.path ?? null;
+    } catch (err: any) {
+      console.error("Error uploading foto:", err);
+      throw new Error(err?.message ?? String(err));
+    }
   }
 
   const { error: upsertError } = await supabaseAdmin.from("profiles").upsert({

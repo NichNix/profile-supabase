@@ -54,7 +54,7 @@ export default async function ProfilePage() {
         </div>
 
         <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8">
-          <form action={saveProfile} encType="multipart/form-data" className="space-y-6">
+          <form action={saveProfile} className="space-y-6">
             <input name="userId" type="hidden" value={userId} />
 
             <div>
